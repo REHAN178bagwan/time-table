@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Timetable</title>
+    <style>
+      
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            margin: 0;
+            padding: 15px;
+            font-size: 1.7em;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            text-align: center;
+        }
+        .container {
+            margin-top: 80px; 
+            padding: 20px;
+            border-radius: 12px;
+            background-color: #fff;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            position: relative;
+            height: calc(100vh - 80px);
+            overflow-y: auto; 
+        }
+       
+        .timetable-entry.show {
+    opacity: 1;
+}
+
+        .timetable-entry {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            color: #333;
+            font-weight: bold;
+            text-align: left;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .timetable-entry .time {
+            flex: 1;
+            color: #007bff;
+            padding-right: 10px;
+            font-size: 1.1em;
+        }
+        .timetable-entry .event {
+            flex: 2;
+            text-align: left;
+            font-size: 1.1em;
+        }
+       
+        .dull {
+            opacity: 0.5;
+            color: #999;
+            pointer-events: none; 
+        }
+      
+        .timetable-entry input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+       
+        input[type="checkbox"] {
+            width: 1.5em;
+            height: 1.5em;
+            appearance: none;
+            background-color: #fff;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        input[type="checkbox"]:checked {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="dayTitle"></h1>
+        <div id="timetable"></div>
+    </div>
+    <script>
+        const timetable = {
+             Monday: [
+                { time: "8:00 am - 10:00 am", event: "Constitution of India (Class)" },
+                { time: "10:00 am - 4:00 pm", event: "Senior design project" },
+                { time: "4:30 pm - 5:30 pm", event: "Study session (Subject 1)" },
+                { time: "5:30 pm - 6:15 pm", event: "Gym/Exercise" },
+                { time: "6:15 pm - 6:30 pm", event: "Prayer break" },
+                { time: "6:30 pm - 7:30 pm", event: "Study session (Subject 2)" },
+                { time: "7:30 pm - 8:00 pm", event: "Exam/Interview prep" },
+                { time: "8:00 pm - 9:00 pm", event: "Dinner" },
+                { time: "9:00 pm - 10:00 pm", event: "Study session (Subject 3)" },
+                { time: "10:00 pm - 11:00 pm", event: "Job interview preparation" },
+                { time: "11:00 pm - 11:30 pm", event: "Wind down for bed" }
+            ],
+            Tuesday: [
+                { time: "8:00 am - 10:00 am", event: "Industrial Data Network (Class)" },
+                { time: "10:15 am - 11:15 am", event: "Mobile Robotics Perception" },
+                { time: "11:15 am - 4:00 pm", event: "Senior design project" },
+                { time: "4:30 pm - 5:30 pm", event: "Study session (Subject 1)" },
+                { time: "5:30 pm - 6:15 pm", event: "Gym/Exercise" },
+                { time: "6:15 pm - 6:30 pm", event: "Prayer break" },
+                { time: "6:30 pm - 7:30 pm", event: "Study session (Subject 2)" },
+                { time: "7:30 pm - 8:00 pm", event: "Exam/Interview prep" },
+                { time: "8:00 pm - 9:00 pm", event: "Dinner" },
+                { time: "9:00 pm - 10:00 pm", event: "Study session (Subject 3)" },
+                { time: "10:00 pm - 11:00 pm", event: "Job interview preparation" },
+                { time: "11:00 pm - 11:30 pm", event: "Wind down for bed" }
+            ],
+            Wednesday: [
+                { time: "9:00 am - 10:00 am", event: "Industrial Data Network (Class)" },
+                { time: "10:00 am - 4:00 pm", event: "Senior design project" },
+                { time: "4:30 pm - 5:30 pm", event: "Study session (Subject 1)" },
+                { time: "5:30 pm - 6:15 pm", event: "Gym/Exercise" },
+                { time: "6:15 pm - 6:30 pm", event: "Prayer break" },
+                { time: "6:30 pm - 7:30 pm", event: "Study session (Subject 2)" },
+                { time: "7:30 pm - 8:00 pm", event: "Exam/Interview prep" },
+                { time: "8:00 pm - 9:00 pm", event: "Dinner" },
+                { time: "9:00 pm - 10:00 pm", event: "Study session (Subject 3)" },
+                { time: "10:00 pm - 11:00 pm", event: "Job interview preparation" },
+                { time: "11:00 pm - 11:30 pm", event: "Wind down for bed" }
+            ],
+            Thursday: [
+                { time: "8:00 am - 4:00 pm", event: "Senior design project" },
+                { time: "4:30 pm - 5:30 pm", event: "Study session (Subject 1)" },
+                { time: "5:30 pm - 6:15 pm", event: "Gym/Exercise" },
+                { time: "6:15 pm - 6:30 pm", event: "Prayer break" },
+                { time: "6:30 pm - 7:30 pm", event: "Study session (Subject 2)" },
+                { time: "7:30 pm - 8:00 pm", event: "Exam/Interview prep" },
+                { time: "8:00 pm - 9:00 pm", event: "Dinner" },
+                { time: "9:00 pm - 10:00 pm", event: "Study session (Subject 3)" },
+                { time: "10:00 pm - 11:00 pm", event: "Job interview preparation" },
+                { time: "11:00 pm - 11:30 pm", event: "Wind down for bed" }
+            ],
+            Friday: [
+                { time: "9:00 am - 10:00 am", event: "Mobile Robotics and Perception (Class)" },
+                { time: "10:00 am - 4:00 pm", event: "Senior design project" },
+                { time: "4:30 pm - 5:30 pm", event: "Study session (Subject 1)" },
+                { time: "5:30 pm - 6:15 pm", event: "Gym/Exercise" },
+                { time: "6:15 pm - 6:30 pm", event: "Prayer break" },
+                { time: "6:30 pm - 7:30 pm", event: "Study session (Subject 2)" },
+                { time: "7:30 pm - 8:00 pm", event: "Exam/Interview prep" },
+                { time: "8:00 pm - 9:00 pm", event: "Dinner" },
+                { time: "9:00 pm - 10:00 pm", event: "Study session (Subject 3)" },
+                { time: "10:00 pm - 11:00 pm", event: "Job interview preparation" },
+                { time: "11:00 pm - 11:30 pm", event: "Wind down for bed" }
+            ],
+            Saturday: [
+                { time: "10:00 am - 11:00 am", event: "Study session (Subject 1)" },
+                { time: "11:00 am - 12:00 pm", event: "Study session (Subject 2)" },
+                { time: "12:00 pm - 1:00 pm", event: "Study session (Subject 3)" },
+                { time: "1:00 pm - 2:00 pm", event: "Lunch" },
+                { time: "2:00 pm - 4:00 pm", event: "Senior design project" },
+                { time: "4:00 pm - 5:00 pm", event: "Gym/Exercise" },
+                { time: "5:00 pm - 6:00 pm", event: "Study session (Subject 1)" },
+                { time: "6:00 pm - 7:00 pm", event: "Dinner" },
+                { time: "7:00 pm - 8:00 pm", event: "Study session (Subject 2)" },
+                { time: "8:00 pm - 9:00 pm", event: "Study session (Subject 3)" },
+                { time: "9:00 pm - 10:00 pm", event: "Job interview preparation" },
+                { time: "10:00 pm - 11:00 pm", event: "Wind down for bed" }
+            ],
+            Sunday: [
+                { time: "10:00 am - 11:00 am", event: "Study session (Subject 1)" },
+                { time: "11:00 am - 12:00 pm", event: "Study session (Subject 2)" },
+                { time: "12:00 pm - 1:00 pm", event: "Study session (Subject 3)" },
+                { time: "1:00 pm - 2:00 pm", event: "Lunch" },
+                { time: "2:00 pm - 4:00 pm", event: "Senior design project" },
+                { time: "4:00 pm - 5:00 pm", event: "Gym/Exercise" },
+                { time: "5:00 pm - 6:00 pm", event: "Study session (Subject 1)" },
+                { time: "6:00 pm - 7:00 pm", event: "Dinner" },
+                { time: "7:00 pm - 8:00 pm", event: "Study session (Subject 2)" },
+                { time: "8:00 pm - 9:00 pm", event: "Study session (Subject 3)" },
+                { time: "9:00 pm - 10:00 pm", event: "Job interview preparation" },
+                { time: "10:00 pm - 11:00 pm", event: "Wind down for bed" }
+            ]
+                       
+        };
+
+        function getDayIndex() {
+            const today = new Date();
+            return today.getDay(); 
+        }
+
+        function updateEventStyles(todayIndex) {
+            const timetableEntries = document.querySelectorAll(".timetable-entry");
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            timetableEntries.forEach((entry, index) => {
+                const eventTimeText = entry.querySelector(".time").textContent.trim();
+                const [hours, minutes] = eventTimeText.split(':')[0].split(' ')[0].split(':').map(Number);
+                const ampm = eventTimeText.split(':')[1].split(' ')[1].toLowerCase(); // Adjust hours for AM/PM
+                const eventHours = (ampm === 'pm' && hours < 12) ? hours + 12 : (ampm === 'am' && hours === 12) ? 0 : hours;
+                const eventDate = new Date(today);
+                eventDate.setHours(eventHours, minutes, 0, 0);
+                const isPastEvent = eventDate < new Date();
+                const checkbox = entry.querySelector("input[type='checkbox']");
+                if (isPastEvent) {
+                    entry.classList.add("dull");
+                    checkbox.disabled = true;
+                } else {
+                    entry.classList.remove("dull");
+                    checkbox.disabled = false;
+                }
+            });
+        }
+
+        function updateCheckboxState(dayIndex) {
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const currentDay = daysOfWeek[dayIndex];
+            checkboxes.forEach((checkbox, index) => {
+                const storageKey = `${currentDay}-checkbox-${index}`;
+                const storedState = localStorage.getItem(storageKey);
+                if (storedState !== null) {
+                    checkbox.checked = JSON.parse(storedState);
+                }
+                checkbox.addEventListener('change', () => {
+                    localStorage.setItem(storageKey, checkbox.checked);
+                });
+            });
+        }
+
+function renderTimetable(dayIndex) {
+    const timetableElement = document.getElementById("timetable");
+    const dayTitle = document.getElementById("dayTitle");
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const selectedDay = daysOfWeek[dayIndex];
+    const selectedTimetable = timetable[selectedDay] || [];
+    dayTitle.textContent = `${selectedDay}    `;
+
+    timetableElement.innerHTML = "";  
+    
+    // Create timetable entries
+    selectedTimetable.forEach((entry, index) => {
+        const entryElement = document.createElement("div");
+        entryElement.classList.add("timetable-entry");
+        entryElement.innerHTML = `
+            <input type="checkbox">
+            <span class="time">${entry.time}:</span>
+            <span class="event">${entry.event}</span>
+        `;
+        timetableElement.appendChild(entryElement);
+    });
+
+   
+    requestAnimationFrame(() => {
+        const entries = document.querySelectorAll(".timetable-entry");
+        entries.forEach((entry) => {
+            entry.classList.add("show");
+        });
+    });
+
+    updateEventStyles(dayIndex);
+    updateCheckboxState(dayIndex);
+}
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let dayIndex = getDayIndex();
+
+    document.addEventListener('touchstart', (event) => {
+    touchStartX = event.touches[0].screenX;
+});
+
+document.addEventListener('touchend', (event) => {
+    touchEndX = event.changedTouches[0].screenX;
+    const swipeDistance = touchEndX - touchStartX;
+    const swipeThreshold = 100; 
+    if (swipeDistance > swipeThreshold) {
+        dayIndex = (dayIndex - 1 + 7) % 7; 
+    } else if (swipeDistance < -swipeThreshold) {
+       dayIndex = (dayIndex + 1) % 7; 
+    }
+    renderTimetable(dayIndex);
+});
+
+    </script>
+</body>
+</html>
